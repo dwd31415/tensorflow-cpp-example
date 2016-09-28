@@ -1,8 +1,8 @@
 #include "tensorflow/core/framework/op.h"
 
 REGISTER_OP("ExampleOp")
-.Input("to_zero: int32")
-.Output("zeroed: int32");
+.Input("in: float32")
+.Output("series: float32");
 
 #include "tensorflow/core/framework/op_kernel.h"
 
@@ -13,7 +13,7 @@ public:
   explicit ExampleOp(OpKernelConstruction* context) : OpKernel(context) {}
 
   void Compute(OpKernelContext* context) override {
-    // Grab the input tensor
+    // Get input tensor
     const Tensor& input_tensor = context->input(0);
     auto input = input_tensor.flat<int32>();
     // Create an output tensor
