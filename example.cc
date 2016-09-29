@@ -32,4 +32,29 @@ public:
   }
 };
 
+#if GOOGLE_CUDA
+#define EIGEN_USE_GPU
+
+void cuda_op_launcher(const float *in, const int N, float* out);
+
+class ExampleOpGPU : public OpKernel {
+public:
+    explicit ExampleOpGPU(OpKernelConstruction* context) : OpKernel(context) {}
+
+    void Compute(OpKernelContext* context) override {
+        // Get input tensor
+        const Tensor& input_tensor = context->input(0);
+        auto input = input_tensor.flat<float>();
+        // Create an output tensor
+        Tensor* output_tensor = NULL;
+        OP_REQUIRES_OK(context, context->allocate_output(0, input_tensor.shape(),
+                                                         &output_tensor));
+        auto output = output_tensor->flat<float>();
+        const int N = input.size();
+        cuda_op_launcher(input.data(), N, output.data());
+    }
+};
+
+REGISTER_KERNEL_BUILDER(Name("ExampleOp").Device(DEVICE_GPU), ExampleOpGPU);
+#endif
 REGISTER_KERNEL_BUILDER(Name("ExampleOp").Device(DEVICE_CPU), ExampleOp);
